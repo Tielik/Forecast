@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{%block title%}POGODA {{country.name}} {%endblock%}
+
+{% block body %}
+</style>
+<!-- userinput -->
+<class id="userInput" >
+    <h1 id="latitudeH">{{country.latidude}}</h1>
+    <h1 id="longitudeH">{{country.longitude}}</h1>
+</class>
+
+<h1 id="title">POGODA {{country.name}}</h1>
+<h2>Dzienny</h2>
+<!-- miejsce dla dzisiaj tak ładniej -->
+<class name="dzienny">
+    <table id="TableDay">
+        <tr>
+          <th>Day</th>
+          <th>daylight duration</th>
+          <th>Max Temp</th>
+          <th>Min Temp</th>
+          <th>Max wind speed</th>
+        </tr>
+    </tr>
+
+      </table> 
+</class>
+<h2>Godzinny</h2>
+<class name="godzinny">
+    <table id="TableHour">
+        <tr>
+          <th>Godziny</th>
+          <th>Temperatura w Godzinie</th>
+          <th>deszcz</th>
+          <th>Cloud Cover</th>
+
+        </tr>
+
+      </table> 
+
+</class>
+
+
+
+
+<!-- <body> -->
+<script>
+    let latitude=document.getElementById("latitudeH").innerHTML;
+    let longitude=document.getElementById("longitudeH").innerHTML;
+    function callEveryHour() {
+        setInterval(changeWeather, 1000 * 60 * 60);
+    }
+    function changeWeather(){
+        var xhr= new XMLHttpRequest();
+        xhr.open('GET', `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=is_day,rain,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,rain,cloud_cover&daily=temperature_2m_max,temperature_2m_min,daylight_duration,wind_speed_10m_max&timezone=Europe%2FBerlin&past_days=2&forecast_days=7`, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response);
+            //check if table is empty
+            //add things to table
+            
+            //day
+            //create tr
+            let tableDay=document.getElementById("TableDay");
+
+            for (let i=0;i<response.daily.time.length;i++){
+            let forloopprototype =i;
+            let trDay=document.createElement("tr");
+            //add day
+            trDay.id=`Day ${forloopprototype}`;
+            tableDay.appendChild(trDay);
+            //adds day
+            let trDayFinder=document.getElementById(`Day ${forloopprototype}`);
+            let dayAdder=document.createElement("th");
+            dayAdder.insertAdjacentText("beforeend",response.daily.time[forloopprototype]);
+            trDayFinder.appendChild(dayAdder);
+            //daylight duration
+            let daylight_duration=document.createElement("th");
+            daylight_duration.insertAdjacentText("beforeend",Math.floor(response.daily.daylight_duration[forloopprototype]/3600) + "h ");
+            trDayFinder.appendChild(daylight_duration);
+            //max temp
+            let max_temp=document.createElement("th");
+            max_temp.insertAdjacentText("beforeend",response.daily.temperature_2m_max[forloopprototype] + "°C");
+            trDayFinder.appendChild(max_temp);
+            //min temp
+            let min_temp=document.createElement("th");
+            min_temp.insertAdjacentText("beforeend",response.daily.temperature_2m_min[forloopprototype] + "°C");
+            trDayFinder.appendChild(min_temp);
+            //max wind speed
+            let max_wind_speed=document.createElement("th");
+            max_wind_speed.insertAdjacentText("beforeend",response.daily.wind_speed_10m_max[forloopprototype] + "km/s");
+            trDayFinder.appendChild(max_wind_speed);
+            }
+            let TableHourly=document.getElementById("TableHour");
+            //hours
+            for(let i =0;i<response.hourly.time.length;i++){
+                let trHour=document.createElement("tr");
+                trHour.id=`Hour ${i}`
+                let hourAdder=document.createElement("th");
+                hourAdder.insertAdjacentText("beforeend",(((response.hourly.time[i]).toString()).substring(0,15)).replace("T"," "));
+                trHour.appendChild(hourAdder);
+                let tempAdder=document.createElement("th");
+                tempAdder.insertAdjacentText("beforeend",response.hourly.temperature_2m[i] + "°C");
+                trHour.appendChild(tempAdder);
+                let rainAdder=document.createElement("th");
+                rainAdder.insertAdjacentText("beforeend",response.hourly.rain[i] + "mm");
+                trHour.appendChild(rainAdder);
+                let cloudCoverAdder=document.createElement("th");
+                cloudCoverAdder.insertAdjacentText("beforeend",response.hourly.cloud_cover[i] + "%");
+                trHour.appendChild(cloudCoverAdder);
+                TableHourly.appendChild(trHour);
+
+                
+            }
+            
+
+
+
+            }
+           };
+           xhr.send();
+
+
+        callEveryHour();
+    }
+    changeWeather();
+
+
+</script>
+<!-- </body> -->
+
+{% endblock %}

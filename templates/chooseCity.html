@@ -1,0 +1,115 @@
+{%extends 'base.html' %}
+<style>
+    #userinput{
+        display: none;
+    }
+</style>
+{%block body%}
+<label for="CityChosser"> Chose City </label>
+<input type="text" id="CityChosser"></input>
+<button id="serch">Search</button>
+<h2>Output</h2>
+<class id="City Finder">
+
+</class>
+
+<!-- <div class="card" style="width: 18rem;">
+    <img class="card-img-top" src="..." alt="Card image cap">
+    <div class="card-body">
+      <h5 class="card-title">Card title</h5>
+      <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+      <a href="#" class="btn btn-primary">Go somewhere</a>
+    </div>
+  </div> -->
+<script>
+    let array=[]
+    const inputField = document.getElementById('CityChosser');
+    const button = document.getElementById('serch');
+    const cityOutput=document.getElementById('City Finder');
+    button.addEventListener('click', () => {
+        var xhr= new XMLHttpRequest();
+        xhr.open('GET', `https://geocoding-api.open-meteo.com/v1/search?name=${inputField.value}&count=20&language=en&format=json`, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response);
+            for(let i =0;i<response.results.length;i++){
+            if(!array.includes(response.results[i].admin1)){
+                array.push(response.results[i].admin1);
+            }
+            else{
+            continue;
+            }
+                //add form
+                let form=document.createElement('form');
+                form.setAttribute('id', 'form');
+                form.setAttribute('method', 'post');
+                cityOutput.appendChild(form);
+
+                let newCard = document.createElement('div');
+                newCard.setAttribute('class', 'card');
+                newCard.setAttribute('style', 'width: 18rem;');
+                
+                let img=document.createElement('img');
+                img.setAttribute('class', 'card-img-top');
+                img.setAttribute('src', `https://flagsapi.com/${response.results[i].country_code}/shiny/64.png`);
+                img.setAttribute('alt', 'Card image cap');
+
+                let cardBody = document.createElement('div');
+                cardBody.setAttribute('class', 'card-body');
+
+                let h5= document.createElement('h5');
+                h5.setAttribute('class', 'card-title');
+                h5.insertAdjacentText("beforeend",response.results[i].name+" "+response.results[i].admin1);
+
+                let input3 = document.createElement('input');
+                input3.setAttribute('type', 'text');
+                input3.setAttribute('id', 'userInput');
+                input3.setAttribute('value',response.results[i].name+" "+response.results[i].admin1);
+                input3.setAttribute('name', 'name');
+                h5.appendChild(input3);
+
+                let p= document.createElement('p');
+                p.setAttribute('class', 'card-text');
+                p.insertAdjacentText("beforeend",response.results[i].country);
+
+                //submit button
+                let submit=document.createElement('button');
+                submit.setAttribute('type', 'submit');
+                submit.setAttribute('class', 'btn btn-primary');
+                submit.insertAdjacentText("beforeend", "Submit");
+                //input
+                let inputLatitude=document.createElement('input');
+                inputLatitude.setAttribute('type', 'text');
+                inputLatitude.setAttribute('id', 'userInput');
+                inputLatitude.setAttribute('value', response.results[i].latitude);
+                inputLatitude.setAttribute('name', 'latidude');
+                
+                let inputLongitude=document.createElement('input');
+                inputLongitude.setAttribute('type', 'text');
+                inputLongitude.setAttribute('id', 'userInput');
+                inputLongitude.setAttribute('value', response.results[i].longitude);
+                inputLongitude.setAttribute('name', 'longitude');
+                //add button
+                form.appendChild(inputLatitude);
+                form.appendChild(inputLongitude);
+
+                cardBody.appendChild(h5);
+                cardBody.appendChild(p);
+                newCard.appendChild(img);
+                newCard.appendChild(cardBody);
+                cityOutput.appendChild(newCard);
+                form.appendChild(newCard);
+                form.appendChild(submit);
+            }
+            
+    
+            
+        
+        }}
+        xhr.send();
+    })
+
+    
+</script>
+{%endblock%}
